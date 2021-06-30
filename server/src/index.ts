@@ -1,8 +1,14 @@
 import { MikroORM } from "@mikro-orm/core";
-import { __prod__ } from "./constants";
-import { Post } from "./entities/Post";
 import config from "./mikro-orm.config";
 import express from "express";
+import { ApolloServer } from "apollo-server-express";
+import { buildSchema } from "type-graphql";
+import "reflect-metadata";
+
+import { __prod__ } from "./constants";
+import { Post } from "./entities/Post";
+import { HelloResolver } from "./resolvers/hello";
+import { PostResolver } from "./resolvers/post";
 
 // console.log("dirname :", __dirname);
 
@@ -17,9 +23,17 @@ const main = async () => {
   // console.log(posts);
 
   const app = express();
-  app.get("/", (_, res) => {
-    res.send("hello");
+
+  const appoloServer = new ApolloServer({
+    schema: await buildSchema({
+      resolvers: [HelloResolver, PostResolver],
+      validate: false,
+    }),
+    context: () => ({ em: orm.em }),
   });
+
+  appoloServer.applyMiddleware({ app });
+
   app.listen(4000, () => {
     console.log("server running at localhost:4000");
   });
