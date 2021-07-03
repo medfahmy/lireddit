@@ -41,24 +41,75 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
-  @Mutation(() => User)
+  @Query(() => User, { nullable: true })
+  async me(@Ctx() { em, req }: Context) {
+    if (!req.session.userID) {
+      return null;
+    }
+
+    const user = await em.findOne(User, { id: req.session.userID });
+    return user;
+  }
+
+  @Mutation(() => UserResponse)
   async register(
-    @Arg("cred") credendtials: UsernamePasswordInput,
-    @Ctx() { em }: Context
-  ) {
+    @Arg("credentials") credendtials: UsernamePasswordInput,
+    @Ctx() { em, req }: Context
+  ): Promise<UserResponse> {
+    if (credendtials.username.length < 2) {
+      return {
+        errors: [
+          {
+            field: "username",
+            message: "length must be greater than 2",
+          },
+        ],
+      };
+    }
+
+    if (credendtials.password.length < 6) {
+      return {
+        errors: [
+          {
+            field: "password",
+            message: "length must be greater than 6",
+          },
+        ],
+      };
+    }
+
     const hashedPassword = await argon2.hash(credendtials.password);
     const user = em.create(User, {
       username: credendtials.username,
       password: hashedPassword,
     });
-    await em.persistAndFlush(user);
-    return user;
+
+    try {
+      await em.persistAndFlush(user);
+    } catch (err) {
+      if (err.code === "23505") {
+        //|| err.detail.includes("already exists")) { //duplicate username error
+        return {
+          errors: [
+            {
+              field: "username",
+              message: "username already taken",
+            },
+          ],
+        };
+      }
+      console.log("message: ", err.message);
+    }
+
+    req.session.userID = user.id;
+
+    return { user };
   }
 
   @Mutation(() => UserResponse)
   async login(
-    @Arg("cred") credendtials: UsernamePasswordInput,
-    @Ctx() { em }: Context
+    @Arg("credentials") credendtials: UsernamePasswordInput,
+    @Ctx() { em, req }: Context
   ): Promise<UserResponse> {
     const user = await em.findOne(User, {
       username: credendtials.username.toLowerCase(),
@@ -73,8 +124,9 @@ export class UserResolver {
         ],
       };
     }
-    const valid = argon2.verify(user.password, credendtials.password);
+    const valid = await argon2.verify(user.password, credendtials.password);
     if (!valid) {
+      console.log("not valid");
       return {
         errors: [
           {
@@ -84,6 +136,9 @@ export class UserResolver {
         ],
       };
     }
+
+    req.session.userID = user.id;
+
     return {
       user,
     };

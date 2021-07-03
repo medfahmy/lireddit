@@ -10,6 +10,12 @@ import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
 
+import redis from "redis";
+import session from "express-session";
+import connectRedis from "connect-redis";
+import { Context } from "./types";
+import cors from "cors";
+
 // console.log("dirname :", __dirname);
 
 const main = async () => {
@@ -24,15 +30,51 @@ const main = async () => {
 
   const app = express();
 
+  const RedisStore = connectRedis(session);
+  const redisClient = redis.createClient();
+
+  // redisClient.on("error", (err) => {
+  //   console.log("error: ", err);
+  // });
+
+  app.use(
+    cors({
+      origin: "http://localhost:3000",
+      credentials: true,
+    })
+  );
+
+  app.use(
+    session({
+      name: "qid",
+      store: new RedisStore({
+        client: redisClient,
+        disableTouch: true,
+      }),
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
+        httpOnly: true,
+        secure: __prod__, // cookie only works in https
+        sameSite: "lax",
+      },
+      saveUninitialized: false,
+      secret: "fizegjjlijgrzgzef",
+      resave: false,
+    })
+  );
+
   const appoloServer = new ApolloServer({
     schema: await buildSchema({
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: () => ({ em: orm.em }),
+    context: ({ req, res }): Context => ({ em: orm.em, req, res }),
   });
 
-  appoloServer.applyMiddleware({ app });
+  appoloServer.applyMiddleware({
+    app,
+    cors: false,
+  });
 
   app.listen(4000, () => {
     console.log("server running at localhost:4000");
