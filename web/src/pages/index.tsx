@@ -1,7 +1,15 @@
 import React from "react";
+import { Navbar } from "../components/Navbar";
 
 interface Props {}
 
-export const Index: React.FC<Props> = () => {
-  return <div>hello</div>;
+const Index: React.FC<Props> = () => {
+  return (
+    <>
+      <Navbar />
+      <div>hello</div>
+    </>
+  );
 };
+
+export default Index;

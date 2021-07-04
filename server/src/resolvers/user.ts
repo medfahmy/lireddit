@@ -101,6 +101,7 @@ export class UserResolver {
       console.log("message: ", err.message);
     }
 
+    console.log(user);
     req.session.userID = user.id;
 
     return { user };
