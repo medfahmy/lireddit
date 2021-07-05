@@ -11,6 +11,7 @@ import {
   Resolver,
 } from "type-graphql";
 import argon2 from "argon2";
+import { COOKIE_NAME } from "../constants";
 
 @InputType()
 class UsernamePasswordInput {
@@ -67,12 +68,12 @@ export class UserResolver {
       };
     }
 
-    if (credendtials.password.length < 6) {
+    if (credendtials.password.length < 2) {
       return {
         errors: [
           {
             field: "password",
-            message: "length must be greater than 6",
+            message: "length must be greater than 2",
           },
         ],
       };
@@ -143,5 +144,20 @@ export class UserResolver {
     return {
       user,
     };
+  }
+
+  @Mutation(() => Boolean)
+  logout(@Ctx() { req, res }: Context) {
+    return new Promise((resolve) =>
+      req.session.destroy((err) => {
+        res.clearCookie(COOKIE_NAME);
+        if (err) {
+          console.log(err);
+          resolve(false);
+          return;
+        }
+        resolve(true);
+      })
+    );
   }
 }
