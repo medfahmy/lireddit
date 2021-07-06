@@ -15,10 +15,12 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import { Context } from "./types";
 import cors from "cors";
+import { sendEmail } from "./utils/sendEmail";
 
 // console.log("dirname :", __dirname);
 
 const main = async () => {
+  sendEmail("medfahmy99@gmail.com", "hello");
   const orm = await MikroORM.init(config);
   orm.getMigrator().up();
   // const post = orm.em.create(Post, { title: "my first post" });
