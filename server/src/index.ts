@@ -16,19 +16,20 @@ import connectRedis from "connect-redis";
 import { Context } from "./types";
 import cors from "cors";
 import { sendEmail } from "./utils/sendEmail";
+import { User } from "./entities/User";
 
 // console.log("dirname :", __dirname);
 
 const main = async () => {
-  sendEmail("medfahmy99@gmail.com", "hello");
   const orm = await MikroORM.init(config);
+  // await orm.em.nativeDelete(User, {});
   orm.getMigrator().up();
   // const post = orm.em.create(Post, { title: "my first post" });
   // await orm.em.persistAndFlush(post);
   // await orm.em.nativeInsert(Post, { title: "my second post" });
 
-  // const posts = await orm.em.find(Post, {});
-  // console.log(posts);
+  // const users = await orm.em.find(User, {});
+  // console.log("users", users);
 
   const app = express();
 

@@ -160,4 +160,10 @@ export class UserResolver {
       })
     );
   }
+
+  @Mutation(() => Boolean)
+  async forgotPassword(@Ctx() {}: Context) {
+    // const user=await em.findOne(User,{email} )
+    return true;
+  }
 }
