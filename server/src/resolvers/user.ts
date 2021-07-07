@@ -1,10 +1,9 @@
 import { User } from "../entities/User";
-import { Context } from "src/types";
+import { Context } from "../types";
 import {
   Arg,
   Ctx,
   Field,
-  InputType,
   Mutation,
   ObjectType,
   Query,
@@ -12,15 +11,8 @@ import {
 } from "type-graphql";
 import argon2 from "argon2";
 import { COOKIE_NAME } from "../constants";
-
-@InputType()
-class UsernamePasswordInput {
-  @Field()
-  username: string;
-
-  @Field()
-  password: string;
-}
+import { UserInput } from "../utils/UserInput";
+import { validateRegister } from "../utils/validateRegister";
 
 @ObjectType()
 class FieldError {
@@ -54,34 +46,18 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async register(
-    @Arg("credentials") credendtials: UsernamePasswordInput,
+    @Arg("credentials") credendtials: UserInput,
     @Ctx() { em, req }: Context
   ): Promise<UserResponse> {
-    if (credendtials.username.length < 2) {
-      return {
-        errors: [
-          {
-            field: "username",
-            message: "length must be greater than 2",
-          },
-        ],
-      };
-    }
-
-    if (credendtials.password.length < 2) {
-      return {
-        errors: [
-          {
-            field: "password",
-            message: "length must be greater than 2",
-          },
-        ],
-      };
+    const errors = validateRegister(credendtials);
+    if (errors) {
+      return { errors };
     }
 
     const hashedPassword = await argon2.hash(credendtials.password);
     const user = em.create(User, {
       username: credendtials.username,
+      email: credendtials.email,
       password: hashedPassword,
     });
 
@@ -110,40 +86,33 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async login(
-    @Arg("credentials") credendtials: UsernamePasswordInput,
+    @Arg("usernameOrEmail") usernameOrEmail: string,
+    @Arg("password") password: string,
     @Ctx() { em, req }: Context
   ): Promise<UserResponse> {
-    const user = await em.findOne(User, {
-      username: credendtials.username.toLowerCase(),
-    });
+    const user = await em.findOne(
+      User,
+      usernameOrEmail.includes("@")
+        ? { email: usernameOrEmail }
+        : { username: usernameOrEmail }
+    );
+
     if (!user) {
       return {
         errors: [
-          {
-            field: "username",
-            message: "username doesn't exist",
-          },
+          { field: "username", message: "username or email doesn't exist" },
         ],
       };
     }
-    const valid = await argon2.verify(user.password, credendtials.password);
+
+    const valid = await argon2.verify(user.password, password);
     if (!valid) {
-      console.log("not valid");
-      return {
-        errors: [
-          {
-            field: "password",
-            message: "incorrect password",
-          },
-        ],
-      };
+      return { errors: [{ field: "password", message: "incorrect password" }] };
     }
 
     req.session.userID = user.id;
 
-    return {
-      user,
-    };
+    return { user };
   }
 
   @Mutation(() => Boolean)

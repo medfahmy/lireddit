@@ -22,8 +22,8 @@ import { User } from "./entities/User";
 
 const main = async () => {
   const orm = await MikroORM.init(config);
-  // await orm.em.nativeDelete(User, {});
-  orm.getMigrator().up();
+  // await orm.em.nativeDelete(User, {}); // wipe table user
+  // orm.getMigrator().up();
   // const post = orm.em.create(Post, { title: "my first post" });
   // await orm.em.persistAndFlush(post);
   // await orm.em.nativeInsert(Post, { title: "my second post" });

@@ -10,7 +10,7 @@ const config: Options = {
     pattern: /^[\w-]+\d+\.[tj]s$/, // regex pattern for the migration files
   },
   entities: [Post, User],
-  dbName: "redditclone",
+  dbName: "lireddit",
   type: "postgresql",
   debug: !__prod__,
   // user: "",
