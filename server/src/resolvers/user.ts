@@ -10,9 +10,11 @@ import {
   Resolver,
 } from "type-graphql";
 import argon2 from "argon2";
-import { COOKIE_NAME } from "../constants";
+import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "../constants";
 import { UserInput } from "../utils/UserInput";
 import { validateRegister } from "../utils/validateRegister";
+import { sendEmail } from "../utils/sendEmail";
+import { v4 } from "uuid";
 
 @ObjectType()
 class FieldError {
@@ -100,7 +102,10 @@ export class UserResolver {
     if (!user) {
       return {
         errors: [
-          { field: "username", message: "username or email doesn't exist" },
+          {
+            field: "usernameOrEmail",
+            message: "username or email doesn't exist",
+          },
         ],
       };
     }
@@ -131,8 +136,26 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  async forgotPassword(@Ctx() {}: Context) {
-    // const user=await em.findOne(User,{email} )
+  async forgotPassword(
+    @Ctx() { em, redis }: Context,
+    @Arg("email") email: string
+  ) {
+    const user = await em.findOne(User, { email });
+    if (!user) {
+      return true;
+    }
+
+    const token = v4();
+    await redis.set(
+      FORGOT_PASSWORD_PREFIX + token,
+      user.id,
+      "ex",
+      1000 * 3600 * 24 * 3
+    );
+    const message = `<a href="http://localhost:3000/change-password/${token}">reset passwored</a>`;
+
+    await sendEmail(email, message);
+
     return true;
   }
 }
