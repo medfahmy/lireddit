@@ -4,14 +4,15 @@ import {
   Arg,
   Ctx,
   Field,
+  InputType,
   Mutation,
   ObjectType,
   Query,
   Resolver,
 } from "type-graphql";
+
 import argon2 from "argon2";
 import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "../constants";
-import { UserInput } from "../utils/UserInput";
 import { validateRegister } from "../utils/validateRegister";
 import { sendEmail } from "../utils/sendEmail";
 import { v4 } from "uuid";
@@ -32,6 +33,17 @@ class UserResponse {
 
   @Field(() => User, { nullable: true })
   user?: User;
+}
+
+@InputType()
+export class UserInput {
+  @Field()
+  username: string;
+  @Field()
+  email: string;
+
+  @Field()
+  password: string;
 }
 
 @Resolver()
@@ -157,5 +169,54 @@ export class UserResolver {
     await sendEmail(email, message);
 
     return true;
+  }
+
+  @Mutation(() => UserResponse)
+  async changePassword(
+    @Arg("token") token: string,
+    @Arg("newPassword") newPassword: string,
+    @Ctx() { em, req, redis }: Context
+  ): Promise<UserResponse> {
+    if (newPassword.length < 2) {
+      return {
+        errors: [
+          {
+            field: "newPassword",
+            message: "length must be greater than 2",
+          },
+        ],
+      };
+    }
+
+    const userId = await redis.get(FORGOT_PASSWORD_PREFIX + token);
+    if (!userId) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "token expired",
+          },
+        ],
+      };
+    }
+
+    const user = await em.findOne(User, { id: parseInt(userId) });
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "user no longer exists",
+          },
+        ],
+      };
+    }
+
+    user.password = await argon2.hash(newPassword);
+    em.persistAndFlush(user);
+
+    req.session.userID = user.id;
+
+    return { user };
   }
 }
