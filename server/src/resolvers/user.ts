@@ -164,7 +164,7 @@ export class UserResolver {
       "ex",
       1000 * 3600 * 24 * 3
     );
-    const message = `<a href="http://localhost:3000/change-password/${token}">reset passwored</a>`;
+    const message = `<a href="http://localhost:3000/change-password/${token}">reset password</a>`;
 
     await sendEmail(email, message);
 
@@ -188,13 +188,14 @@ export class UserResolver {
       };
     }
 
-    const userId = await redis.get(FORGOT_PASSWORD_PREFIX + token);
+    const key = FORGOT_PASSWORD_PREFIX + token;
+    const userId = await redis.get(key);
     if (!userId) {
       return {
         errors: [
           {
             field: "token",
-            message: "token expired",
+            message: "token invalid or expired",
           },
         ],
       };
@@ -214,6 +215,8 @@ export class UserResolver {
 
     user.password = await argon2.hash(newPassword);
     em.persistAndFlush(user);
+
+    await redis.del(key);
 
     req.session.userID = user.id;
 
