@@ -1,15 +1,11 @@
-import { Box, Flex, Link, Button } from "@chakra-ui/react";
-import { Formik, Form } from "formik";
-import router from "next/router";
-import NextLink from "next/link";
-import React from "react";
+import { Box, Button } from "@chakra-ui/react";
+import { Form, Formik } from "formik";
+import { withUrqlClient } from "next-urql";
+import React, { useState } from "react";
 import { InputField } from "../components/InputField";
 import { Wrapper } from "../components/Wrapper";
-import { toErrorMap } from "../utils/toErrorMap";
-import { withUrqlClient } from "next-urql";
-import { createUrqlClient } from "../utils/createUrqlClient";
 import { useForgotPasswordMutation } from "../generated/graphql";
-import { useState } from "react";
+import { createUrqlClient } from "../utils/createUrqlClient";
 
 const ForgotPassword: React.FC<{}> = () => {
   const [complete, setComplete] = useState(false);
@@ -27,14 +23,14 @@ const ForgotPassword: React.FC<{}> = () => {
         {({ isSubmitting }) =>
           complete ? (
             <Box>
-              if an account with this email exists, we have a sent a link to
-              reset your password
+              if an account with this email exists, we sent a link to reset your
+              password
             </Box>
           ) : (
             <Form>
               <InputField
                 name="email"
-                label="email or email"
+                label="email"
                 placeholder="email"
                 type="email"
               />
