@@ -4,7 +4,6 @@ import { Session, SessionData } from "express-session";
 import { Redis } from "ioredis";
 
 export type Context = {
-  em: EntityManager<IDatabaseDriver<Connection>>;
   req: Request & { session: Session & Partial<SessionData> };
   res: Response;
   redis: Redis;

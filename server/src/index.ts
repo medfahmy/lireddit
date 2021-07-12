@@ -1,27 +1,34 @@
-import { MikroORM } from "@mikro-orm/core";
-import config from "./mikro-orm.config";
-import express from "express";
 import { ApolloServer } from "apollo-server-express";
-import { buildSchema } from "type-graphql";
+import connectRedis from "connect-redis";
+import cors from "cors";
+import express from "express";
+import session from "express-session";
+import Redis from "ioredis";
 import "reflect-metadata";
-
+import { buildSchema } from "type-graphql";
+import { createConnection } from "typeorm";
 import { COOKIE_NAME, __prod__ } from "./constants";
+import { Post } from "./entities/Post";
+import { User } from "./entities/User";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
-
-import Redis from "ioredis";
-import session from "express-session";
-import connectRedis from "connect-redis";
 import { Context } from "./types";
-import cors from "cors";
-import { sendEmail } from "./utils/sendEmail";
-import { User } from "./entities/User";
 
 // console.log("dirname :", __dirname);
 
 const main = async () => {
-  const orm = await MikroORM.init(config);
+  const connection = await createConnection({
+    type: "postgres",
+    database: "lireddit2",
+    username: "postgres",
+    password: "postgres",
+    logging: true,
+    synchronize: true,
+    entities: [User, Post],
+  });
+
+  //const orm = await MikroORM.init(config);
   // await orm.em.nativeDelete(User, {}); // wipe table user
   // orm.getMigrator().up();
   // const post = orm.em.create(Post, { title: "my first post" });
@@ -71,7 +78,7 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }): Context => ({ em: orm.em, req, res, redis }),
+    context: ({ req, res }): Context => ({ req, res, redis }),
   });
 
   appoloServer.applyMiddleware({
