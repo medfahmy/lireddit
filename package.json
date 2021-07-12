@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "watch": "cd server & yarn watch",
-    "server": "cd server & yarn dev",
-    "web": "cd web & yarn dev"
+    "watch": "cd server && yarn watch",
+    "server": "cd server && yarn dev",
+    "web": "cd web && yarn dev"
   },
   "repository": {
     "type": "git",
