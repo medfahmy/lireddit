@@ -1,0 +1,23 @@
+{
+  "name": "reddit-clone",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "watch": "cd server & yarn watch",
+    "server": "cd server & yarn dev",
+    "web": "cd web & yarn dev",
+    "rds": "redis-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/medfahmy/reddit-clone.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/medfahmy/reddit-clone/issues"
+  },
+  "homepage": "https://github.com/medfahmy/reddit-clone#readme"
+}
