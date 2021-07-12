@@ -2,7 +2,6 @@
   "name": "reddit-clone",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "watch": "cd server && yarn watch",
     "server": "cd server && yarn dev",
