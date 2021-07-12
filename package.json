@@ -6,8 +6,7 @@
   "scripts": {
     "watch": "cd server & yarn watch",
     "server": "cd server & yarn dev",
-    "web": "cd web & yarn dev",
-    "rds": "redis-server"
+    "web": "cd web & yarn dev"
   },
   "repository": {
     "type": "git",
