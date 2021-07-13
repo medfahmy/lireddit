@@ -10,7 +10,6 @@ import { createConnection } from "typeorm";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import { Post } from "./entities/Post";
 import { User } from "./entities/User";
-import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
 import { Context } from "./types";
@@ -27,6 +26,8 @@ const main = async () => {
     synchronize: true,
     entities: [User, Post],
   });
+
+  // await Post.delete({});
 
   //const orm = await MikroORM.init(config);
   // await orm.em.nativeDelete(User, {}); // wipe table user
@@ -75,7 +76,7 @@ const main = async () => {
 
   const appoloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver, PostResolver, UserResolver],
+      resolvers: [PostResolver, UserResolver],
       validate: false,
     }),
     context: ({ req, res }): Context => ({ req, res, redis }),

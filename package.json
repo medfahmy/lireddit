@@ -1,11 +1,12 @@
 {
-  "name": "reddit-clone",
+  "name": "lireddit",
   "version": "1.0.0",
   "description": "",
   "scripts": {
     "watch": "cd server && yarn watch",
     "server": "cd server && yarn dev",
-    "web": "cd web && yarn dev"
+    "web": "cd web && yarn dev",
+    "gen": "cd web && yarn gen"
   },
   "repository": {
     "type": "git",
