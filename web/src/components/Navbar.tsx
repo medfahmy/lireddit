@@ -19,7 +19,7 @@ export const Navbar: React.FC<{}> = () => {
           <Link mr={2}>login</Link>
         </NextLink>
         <NextLink href="/register">
-          <Link>register</Link>
+          <Link mr={2}>register</Link>
         </NextLink>
       </>
     );
@@ -31,6 +31,7 @@ export const Navbar: React.FC<{}> = () => {
           onClick={() => logout()}
           variant="link"
           isLoading={logoutFetching}
+          mr={2}
         >
           logout
         </Button>
@@ -40,6 +41,9 @@ export const Navbar: React.FC<{}> = () => {
 
   return (
     <Flex position="sticky" top={0} zIndex={1} bg="tan" p={4}>
+      <NextLink href="/">
+        <Link mr={"auto"}>home</Link>
+      </NextLink>
       <Box ml={"auto"}>{body}</Box>
     </Flex>
   );

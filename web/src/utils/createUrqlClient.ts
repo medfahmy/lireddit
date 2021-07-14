@@ -9,6 +9,7 @@ import {
   MeQuery,
   RegisterMutation,
 } from "../generated/graphql";
+import { cursorPagination } from "./cursorPagination";
 import { updateQuery } from "./updateQuery";
 
 export const errorExchange: Exchange =
@@ -32,6 +33,11 @@ export const createUrqlClient = (ssrExchange: any) => ({
   exchanges: [
     dedupExchange,
     cacheExchange({
+      resolvers: {
+        Query: {
+          posts: cursorPagination(),
+        },
+      },
       updates: {
         Mutation: {
           login: (_result, args, cache, info) => {

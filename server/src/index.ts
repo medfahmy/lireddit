@@ -13,6 +13,7 @@ import { User } from "./entities/User";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
 import { Context } from "./types";
+import path from "path";
 
 // console.log("dirname :", __dirname);
 
@@ -24,20 +25,13 @@ const main = async () => {
     password: "postgres",
     logging: true,
     synchronize: true,
+    migrations: [path.join(__dirname, "./migrations/*")],
     entities: [User, Post],
   });
 
+  await connection.runMigrations();
+
   // await Post.delete({});
-
-  //const orm = await MikroORM.init(config);
-  // await orm.em.nativeDelete(User, {}); // wipe table user
-  // orm.getMigrator().up();
-  // const post = orm.em.create(Post, { title: "my first post" });
-  // await orm.em.persistAndFlush(post);
-  // await orm.em.nativeInsert(Post, { title: "my second post" });
-
-  // const users = await orm.em.find(User, {});
-  // console.log("users", users);
 
   const app = express();
 
