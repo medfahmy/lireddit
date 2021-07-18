@@ -40,7 +40,7 @@ const main = async () => {
 
   // redisClient.on("error", (err) => {
   //   console.log("error: ", err);
-  // });
+  // };
 
   app.use(
     cors({
