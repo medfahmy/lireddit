@@ -28,11 +28,11 @@ export const validateRegister = (credentials: UserInput) => {
     ];
   }
 
-  if (credentials.password.length < 2) {
+  if (credentials.password.length < 5) {
     return [
       {
         field: "password",
-        message: "length must be greater than 2",
+        message: "length must be greater than 5",
       },
     ];
   }
