@@ -38,8 +38,6 @@ export const cursorPagination = (): Resolver => {
       posts: results,
     };
 
-    console.log("return", obj);
-
     return obj;
   };
 };

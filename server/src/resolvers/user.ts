@@ -4,11 +4,13 @@ import {
   Arg,
   Ctx,
   Field,
+  FieldResolver,
   InputType,
   Mutation,
   ObjectType,
   Query,
   Resolver,
+  Root,
 } from "type-graphql";
 
 import argon2 from "argon2";
@@ -46,15 +48,24 @@ export class UserInput {
   password: string;
 }
 
-@Resolver()
+@Resolver(User)
 export class UserResolver {
+  @FieldResolver(() => String)
+  email(@Root() user: User, @Ctx() { req }: Context) {
+    // this is the current user and its ok to show them their own email
+    if (req.session.userId === user.id) {
+      return user.email;
+    }
+    return "";
+  }
+
   @Query(() => User, { nullable: true })
   me(@Ctx() { req }: Context) {
-    if (!req.session.userID) {
+    if (!req.session.userId) {
       return null;
     }
 
-    return User.findOne(req.session.userID);
+    return User.findOne(req.session.userId);
   }
 
   @Mutation(() => UserResponse)
@@ -92,7 +103,7 @@ export class UserResolver {
     }
 
     console.log(user);
-    req.session.userID = user.id;
+    req.session.userId = user.id;
 
     return { user };
   }
@@ -125,7 +136,7 @@ export class UserResolver {
       return { errors: [{ field: "password", message: "incorrect password" }] };
     }
 
-    req.session.userID = user.id;
+    req.session.userId = user.id;
 
     return { user };
   }
@@ -219,7 +230,7 @@ export class UserResolver {
 
     await redis.del(key);
 
-    req.session.userID = user.id;
+    req.session.userId = user.id;
 
     return { user };
   }

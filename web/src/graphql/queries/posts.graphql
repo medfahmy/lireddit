@@ -9,7 +9,7 @@ query Posts($limit: Int!, $cursor: String) {
       points
       createdAt
       updatedAt
-      creatorID
+      creatorId
     }
   }
 }

@@ -20,7 +20,7 @@ import path from "path";
 const main = async () => {
   const connection = await createConnection({
     type: "postgres",
-    database: "lireddit2",
+    database: "lireddit",
     username: "postgres",
     password: "postgres",
     logging: true,
@@ -31,7 +31,7 @@ const main = async () => {
 
   await connection.runMigrations();
 
-  // await Post.delete({});
+  //await Post.delete({});
 
   const app = express();
 
