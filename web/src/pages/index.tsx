@@ -4,15 +4,27 @@ import { Layout } from "../components/Layout";
 import { usePostsQuery } from "../generated/graphql";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import NextLink from "next/link";
-import { Box, Button, Flex, Heading, Stack, Tag, Text } from "@chakra-ui/react";
+import {
+  Link,
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Stack,
+  Tag,
+  Text,
+  Icon,
+  IconButton,
+} from "@chakra-ui/react";
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { UpdootSection } from "../components/UpdootSection";
 
-interface Props {}
-
-const Index: React.FC<Props> = () => {
+function Index() {
   const [variables, setVariables] = useState({
-    limit: 33,
+    limit: 15,
     cursor: null as string | null,
   });
+
   const [{ data, fetching }] = usePostsQuery({
     variables,
   });
@@ -23,13 +35,11 @@ const Index: React.FC<Props> = () => {
 
   return (
     <Layout>
-      <Flex>
+      <Flex align="center">
         <Heading>lireddit</Heading>
 
         <NextLink href="/create-post">
-          <Button ml="auto" color="blue">
-            create post
-          </Button>
+          <Link ml="auto">create post</Link>
         </NextLink>
       </Flex>
 
@@ -40,25 +50,26 @@ const Index: React.FC<Props> = () => {
       ) : (
         <Stack spacing={8}>
           {data!.posts.posts.map((p) => (
-            <Box key={p.id} p={5} shadow="md" borderWidth="1px">
-              <Heading fontSize="xl">{p.title}</Heading>
-              <NextLink href={`/user/${p.creatorID}`}>
-                <Button size="small" fontSize="xl">
-                  {p.creatorID}
-                </Button>
-              </NextLink>
-              <Text mt={4}>
-                {p.textSnippet}
-                <NextLink href={`/post/${p.id}`}>
-                  <Button size="small"> ...</Button>
+            <Flex key={p.id} p={5} shadow="md" borderWidth="1px">
+              <UpdootSection post={p} />
+              <Box>
+                <Heading fontSize="xl">{p.title}</Heading>
+                <NextLink href={`/user/${p.creator.username}`}>
+                  <Link fontSize="medium">posted by {p.creator.username}</Link>
                 </NextLink>
-              </Text>
-            </Box>
+                <Text mt={4}>
+                  {p.textSnippet}
+                  <NextLink href={`/post/${p.id}`}>
+                    <Button size="small"> ...</Button>
+                  </NextLink>
+                </Text>
+              </Box>
+            </Flex>
           ))}
         </Stack>
       )}
 
-      {data && data.posts.hasMore && (
+      {data && data.posts.hasMore ? (
         <Flex>
           <Button
             isLoading={fetching}
@@ -74,9 +85,9 @@ const Index: React.FC<Props> = () => {
             load more
           </Button>
         </Flex>
-      )}
+      ) : null}
     </Layout>
   );
-};
+}
 
 export default withUrqlClient(createUrqlClient, { ssr: true })(Index);

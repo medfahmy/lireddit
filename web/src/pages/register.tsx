@@ -33,6 +33,7 @@ const Register: React.FC<{}> = ({}) => {
               name="username"
               label="username"
               placeholder="username"
+              autoFocus
             />
 
             <Box mt={4}>

@@ -38,6 +38,7 @@ const Login: React.FC<{}> = ({}) => {
               name="usernameOrEmail"
               label="username or email"
               placeholder="username or email"
+              autoFocus
             />
 
             <Box mt={4}>

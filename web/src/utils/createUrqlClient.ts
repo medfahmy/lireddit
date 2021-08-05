@@ -33,14 +33,15 @@ export const createUrqlClient = (ssrExchange: any) => ({
   exchanges: [
     dedupExchange,
     cacheExchange({
-      // keys: {
-      //   PaginatedPosts: () => null,
-      // },
-      // resolvers: {
-      //   Query: {
-      //     // posts: cursorPagination(),
-      //   },
-      // },
+      keys: {
+        PaginatedPosts: () => null,
+      },
+      resolvers: {
+        Query: {
+          posts: cursorPagination(),
+        },
+      },
+
       updates: {
         Mutation: {
           login: (_result, args, cache, info) => {
@@ -59,6 +60,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
               }
             );
           },
+
           register: (_result, args, cache, info) => {
             updateQuery<RegisterMutation, MeQuery>(
               cache,
@@ -75,6 +77,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
               }
             );
           },
+
           logout: (_result, args, cache, info) => {
             updateQuery<LogoutMutation, MeQuery>(
               cache,
@@ -82,6 +85,16 @@ export const createUrqlClient = (ssrExchange: any) => ({
               _result,
               () => ({ me: null })
             );
+          },
+
+          createPost: (_result, args, cache, info) => {
+            const allFields = cache.inspectFields("Query");
+            const fieldInfo = allFields.filter(
+              (info) => info.fieldName === "posts"
+            );
+            fieldInfo.forEach((fi) => {
+              cache.invalidate("Query", "posts", fi.arguments);
+            });
           },
         },
       },
