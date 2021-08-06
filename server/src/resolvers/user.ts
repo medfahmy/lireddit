@@ -1,5 +1,5 @@
 import { User } from "../entities/User";
-import { Context } from "../types";
+import { MyContext } from "../types";
 import {
   Arg,
   Ctx,
@@ -51,7 +51,7 @@ export class UserInput {
 @Resolver(User)
 export class UserResolver {
   @FieldResolver(() => String)
-  email(@Root() user: User, @Ctx() { req }: Context) {
+  email(@Root() user: User, @Ctx() { req }: MyContext) {
     // this is the current user and its ok to show them their own email
     if (req.session.userId === user.id) {
       return user.email;
@@ -60,7 +60,7 @@ export class UserResolver {
   }
 
   @Query(() => User, { nullable: true })
-  me(@Ctx() { req }: Context) {
+  me(@Ctx() { req }: MyContext) {
     if (!req.session.userId) {
       return null;
     }
@@ -71,7 +71,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async register(
     @Arg("credentials") credendtials: UserInput,
-    @Ctx() { req }: Context
+    @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
     const errors = validateRegister(credendtials);
     if (errors) {
@@ -112,7 +112,7 @@ export class UserResolver {
   async login(
     @Arg("usernameOrEmail") usernameOrEmail: string,
     @Arg("password") password: string,
-    @Ctx() { req }: Context
+    @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
     let login = usernameOrEmail.includes("@")
       ? { email: usernameOrEmail }
@@ -142,7 +142,7 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  logout(@Ctx() { req, res }: Context) {
+  logout(@Ctx() { req, res }: MyContext) {
     return new Promise((resolve) =>
       req.session.destroy((err) => {
         res.clearCookie(COOKIE_NAME);
@@ -157,7 +157,10 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  async forgotPassword(@Ctx() { redis }: Context, @Arg("email") email: string) {
+  async forgotPassword(
+    @Ctx() { redis }: MyContext,
+    @Arg("email") email: string
+  ) {
     const user = await User.findOne({ where: { email } });
     if (!user) {
       return true;
@@ -181,7 +184,7 @@ export class UserResolver {
   async changePassword(
     @Arg("token") token: string,
     @Arg("newPassword") newPassword: string,
-    @Ctx() { req, redis }: Context
+    @Ctx() { req, redis }: MyContext
   ): Promise<UserResponse> {
     if (newPassword.length < 2) {
       return {

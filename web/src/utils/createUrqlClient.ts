@@ -8,9 +8,12 @@ import {
   MeDocument,
   MeQuery,
   RegisterMutation,
+  VoteMutation,
+  VoteMutationVariables,
 } from "../generated/graphql";
 import { cursorPagination } from "./cursorPagination";
 import { updateQuery } from "./updateQuery";
+import gql from "graphql-tag";
 
 export const errorExchange: Exchange =
   ({ forward }) =>
@@ -95,6 +98,31 @@ export const createUrqlClient = (ssrExchange: any) => ({
             fieldInfo.forEach((fi) => {
               cache.invalidate("Query", "posts", fi.arguments);
             });
+          },
+
+          vote: (_result, args, cache, info) => {
+            const { postId, value } = args as VoteMutationVariables;
+            const data = cache.readFragment(
+              gql`
+                fragment _ on Post {
+                  id
+                  points
+                }
+              `,
+              { id: postId } as any
+            );
+
+            if (data) {
+              const newPoints = (data.points as number) + value;
+              cache.writeFragment(
+                gql`
+                  fragment _ on Post {
+                    points
+                  }
+                `,
+                { id: postId, points: newPoints } as any
+              );
+            }
           },
         },
       },

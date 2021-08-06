@@ -12,7 +12,7 @@ import { Post } from "./entities/Post";
 import { User } from "./entities/User";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
-import { Context } from "./types";
+import { MyContext } from "./types";
 import path from "path";
 import { Updoot } from "./entities/Updoot";
 
@@ -74,7 +74,7 @@ const main = async () => {
       resolvers: [PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }): Context => ({ req, res, redis }),
+    context: ({ req, res }): MyContext => ({ req, res, redis }),
   });
 
   appoloServer.applyMiddleware({
