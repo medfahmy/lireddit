@@ -1,7 +1,7 @@
 import { withUrqlClient } from "next-urql";
 import React, { useState } from "react";
 import { Layout } from "../components/Layout";
-import { usePostsQuery } from "../generated/graphql";
+import { useDeletePostMutation, usePostsQuery } from "../generated/graphql";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import NextLink from "next/link";
 import {
@@ -16,7 +16,7 @@ import {
   Icon,
   IconButton,
 } from "@chakra-ui/react";
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { ChevronDownIcon, ChevronUpIcon, DeleteIcon } from "@chakra-ui/icons";
 import { UpdootSection } from "../components/UpdootSection";
 
 function Index() {
@@ -29,43 +29,48 @@ function Index() {
     variables,
   });
 
+  const [, deletePost] = useDeletePostMutation();
+
   if (!fetching && !data) {
     return <div>query failed for some reason</div>;
   }
 
   return (
     <Layout>
-      <Flex align="center">
-        <Heading>lireddit</Heading>
-
-        <NextLink href="/create-post">
-          <Link ml="auto">create post</Link>
-        </NextLink>
-      </Flex>
-
-      <br />
-
       {fetching && !data ? (
         <Tag>loading...</Tag>
       ) : (
         <Stack spacing={8}>
-          {data!.posts.posts.map((p) => (
-            <Flex key={p.id} p={5} shadow="md" borderWidth="1px">
-              <UpdootSection post={p} />
-              <Box>
-                <Heading fontSize="xl">{p.title}</Heading>
-                <NextLink href={`/user/${p.creator.username}`}>
-                  <Link fontSize="medium">posted by {p.creator.username}</Link>
-                </NextLink>
-                <Text mt={4}>
-                  {p.textSnippet}
-                  <NextLink href={`/post/${p.id}`}>
-                    <Button size="small"> ...</Button>
+          {data!.posts.posts.map((p) =>
+            !p ? null : (
+              <Flex key={p.id} p={5} shadow="md" borderWidth="1px">
+                <UpdootSection post={p} />
+                <Box flex={1}>
+                  <NextLink href="/post/[id]" as={`/post/${p.id}`}>
+                    <Link>
+                      <Heading fontSize="xl">{p.title}</Heading>
+                    </Link>
                   </NextLink>
-                </Text>
-              </Box>
-            </Flex>
-          ))}
+                  <NextLink href={`/user/${p.creator.username}`}>
+                    <Link fontSize="medium">
+                      posted by {p.creator.username}
+                    </Link>
+                  </NextLink>
+                  <Flex align="center">
+                    <Text mt={4}>{p.textSnippet}</Text>
+                    <IconButton
+                      ml="auto"
+                      icon={<DeleteIcon />}
+                      aria-label="delete post"
+                      onClick={() => {
+                        deletePost({ id: p.id });
+                      }}
+                    />
+                  </Flex>
+                </Box>
+              </Flex>
+            )
+          )}
         </Stack>
       )}
 
