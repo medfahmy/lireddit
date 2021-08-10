@@ -12,7 +12,7 @@ import { Post } from "./entities/Post";
 import { User } from "./entities/User";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
-import { Context } from "./types";
+import { MyContext } from "./types";
 import path from "path";
 import { Updoot } from "./entities/Updoot";
 
@@ -60,10 +60,10 @@ const main = async () => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
         httpOnly: true,
-        secure: __prod__, // cookie only works in https
+        secure: false, // set it to __prod__ in prod
         sameSite: "lax",
       },
-      saveUninitialized: false,
+      saveUninitialized: true,
       secret: "fizegjjlijgrzgzef",
       resave: false,
     })
@@ -74,7 +74,7 @@ const main = async () => {
       resolvers: [PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }): Context => ({ req, res, redis }),
+    context: ({ req, res }): MyContext => ({ req, res, redis }),
   });
 
   appoloServer.applyMiddleware({

@@ -1,5 +1,5 @@
 import { Post } from "../entities/Post";
-import { Context } from "../types";
+import { MyContext } from "../types";
 import {
   Arg,
   Ctx,
@@ -48,7 +48,7 @@ export class PostResolver {
   async vote(
     @Arg("postId", () => Int) postId: number,
     @Arg("value", () => Int) value: number,
-    @Ctx() { req }: Context
+    @Ctx() { req }: MyContext
   ) {
     const { userId } = req.session;
     const isUpdoot = value !== -1;
@@ -110,7 +110,7 @@ export class PostResolver {
   async posts(
     @Arg("limit", () => Int) limit: number,
     @Arg("cursor", () => String, { nullable: true }) cursor: string | null,
-    @Ctx() { req }: Context
+    @Ctx() { req }: MyContext
   ): Promise<PaginatedPosts> {
     const realLimit = Math.min(50, limit);
     const realLimitPlusOne = realLimit + 1;
@@ -185,7 +185,7 @@ export class PostResolver {
   @UseMiddleware(isAuth)
   async createPost(
     @Arg("input") input: PostInput,
-    @Ctx() { req }: Context
+    @Ctx() { req }: MyContext
   ): Promise<Post> {
     return Post.create({ ...input, creatorId: req.session.userId }).save();
   }
@@ -196,16 +196,28 @@ export class PostResolver {
     @Arg("id", () => Int) id: number,
     @Arg("title") title: string,
     @Arg("text") text: string,
-    @Ctx() { req }: Context
+    @Ctx() { req }: MyContext
   ): Promise<Post | null> {
-    return Post.update({ id, creatorId: req.session.userId }, { title, text });
+    const post = await getConnection()
+      .createQueryBuilder()
+      .update(Post)
+      .set({ title, text })
+      .where('id = :id and "creatorId" = :creatorId', {
+        id,
+        creatorId: req.session.userId,
+      })
+      .returning("*")
+      .execute();
+
+    console.log("post", post);
+    return post as any;
   }
 
   @Mutation(() => Boolean)
   @UseMiddleware(isAuth)
   async deletePost(
     @Arg("id", () => Int) id: number,
-    @Ctx() { req }: Context
+    @Ctx() { req }: MyContext
   ): Promise<boolean> {
     // const post = await Post.findOne(id);
     // if (!post) {
