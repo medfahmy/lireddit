@@ -9,7 +9,6 @@ import {
   MeDocument,
   MeQuery,
   RegisterMutation,
-  VoteMutation,
   VoteMutationVariables,
 } from "../generated/graphql";
 import { cursorPagination } from "./cursorPagination";
@@ -33,7 +32,7 @@ export const errorExchange: Exchange =
 export const createUrqlClient = (ssrExchange: any, ctx: any) => {
   let cookie = "";
   if (isServer()) {
-    cookie = ctx.req.headers.cookie;
+    cookie = ctx?.req?.headers?.cookie;
   }
 
   return {
@@ -79,6 +78,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
                 if (data.voteStatus === value) {
                   return;
                 }
+
                 const newPoints =
                   (data.points as number) + (!data.voteStatus ? 1 : 2) * value;
                 cache.writeFragment(

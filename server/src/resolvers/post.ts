@@ -17,7 +17,6 @@ import {
 import { isAuth } from "../middleware/isAuth";
 import { getConnection } from "typeorm";
 import { Updoot } from "../entities/Updoot";
-import { UserResolver } from "./user";
 
 @InputType()
 class PostInput {
@@ -123,8 +122,6 @@ export class PostResolver {
       replacements.push(userId);
     }
 
-    console.log("userid", userId);
-
     let cursorIdx = 3;
     if (cursor) {
       replacements.push(new Date(parseInt(cursor)));
@@ -198,7 +195,7 @@ export class PostResolver {
     @Arg("text") text: string,
     @Ctx() { req }: MyContext
   ): Promise<Post | null> {
-    const post = await getConnection()
+    const result = await getConnection()
       .createQueryBuilder()
       .update(Post)
       .set({ title, text })
@@ -209,8 +206,7 @@ export class PostResolver {
       .returning("*")
       .execute();
 
-    console.log("post", post);
-    return post as any;
+    return result.raw[0];
   }
 
   @Mutation(() => Boolean)

@@ -4,17 +4,10 @@ import { usePostQuery } from "../../generated/graphql";
 import { createUrqlClient } from "../../utils/createUrqlClient";
 import { Layout } from "../../components/Layout";
 import { Box, Heading } from "@chakra-ui/react";
+import { useGetPostFromUrl } from "../../hooks/useGetPostFromUrl";
 
 const Post = ({}) => {
-  const router = useRouter();
-  const id =
-    typeof router.query.id === "string" ? parseInt(router.query.id) : -1;
-  const [{ data, error, fetching }] = usePostQuery({
-    pause: id === -1,
-    variables: {
-      id,
-    },
-  });
+  const [{ data, error, fetching }] = useGetPostFromUrl();
 
   if (fetching) {
     return (

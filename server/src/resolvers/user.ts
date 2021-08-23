@@ -61,6 +61,7 @@ export class UserResolver {
 
   @Query(() => User, { nullable: true })
   me(@Ctx() { req }: MyContext) {
+    console.log("userId", req.session.userId);
     if (!req.session.userId) {
       return null;
     }
@@ -99,10 +100,9 @@ export class UserResolver {
           ],
         };
       }
-      console.log("message: ", err.message);
+      // console.log("message: ", err.message);
     }
 
-    console.log(user);
     req.session.userId = user.id;
 
     return { user };
@@ -137,7 +137,7 @@ export class UserResolver {
     }
 
     req.session.userId = user.id;
-    console.log(req.session.userId);
+    console.log("userId", req.session.userId);
 
     return { user };
   }
