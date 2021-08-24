@@ -5,6 +5,7 @@ import { createUrqlClient } from "../../utils/createUrqlClient";
 import { Layout } from "../../components/Layout";
 import { Box, Heading } from "@chakra-ui/react";
 import { useGetPostFromUrl } from "../../hooks/useGetPostFromUrl";
+import { EditDeletePost } from "../../components/EditDeletePost";
 
 const Post = ({}) => {
   const [{ data, error, fetching }] = useGetPostFromUrl();
@@ -38,6 +39,9 @@ const Post = ({}) => {
       <Box>
         <Heading mb={4}>{data.post.title}</Heading>
         <p>{data.post.text}</p>
+      </Box>
+      <Box>
+        <EditDeletePost id={data.post.id} creatorId={data.post.creator.id} />
       </Box>
     </Layout>
   );
