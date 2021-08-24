@@ -1,6 +1,4 @@
 import { withUrqlClient } from "next-urql";
-import { useRouter } from "next/router";
-import { usePostQuery } from "../../generated/graphql";
 import { createUrqlClient } from "../../utils/createUrqlClient";
 import { Layout } from "../../components/Layout";
 import { Box, Heading } from "@chakra-ui/react";

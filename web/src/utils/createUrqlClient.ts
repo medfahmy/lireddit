@@ -1,4 +1,4 @@
-import { cacheExchange } from "@urql/exchange-graphcache";
+import { cacheExchange, Cache } from "@urql/exchange-graphcache";
 import Router from "next/router";
 import { dedupExchange, Exchange, fetchExchange } from "urql";
 import { pipe, tap } from "wonka";
@@ -28,6 +28,14 @@ export const errorExchange: Exchange =
       })
     );
   };
+
+const invalidateAllPosts = (cache: Cache) => {
+  const allFields = cache.inspectFields("Query");
+  const fieldInfo = allFields.filter((info) => info.fieldName === "posts");
+  fieldInfo.forEach((fi) => {
+    cache.invalidate("Query", "posts", fi.arguments);
+  });
+};
 
 export const createUrqlClient = (ssrExchange: any, ctx: any) => {
   let cookie = "";
@@ -94,13 +102,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
             },
 
             createPost: (_result, args, cache, info) => {
-              const allFields = cache.inspectFields("Query");
-              const fieldInfo = allFields.filter(
-                (info) => info.fieldName === "posts"
-              );
-              fieldInfo.forEach((fi) => {
-                cache.invalidate("Query", "posts", fi.arguments);
-              });
+              invalidateAllPosts(cache);
             },
 
             logout: (_result, args, cache, info) => {
@@ -127,6 +129,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
                   }
                 }
               );
+              invalidateAllPosts(cache);
             },
 
             register: (_result, args, cache, info) => {
